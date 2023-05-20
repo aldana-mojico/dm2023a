@@ -6,7 +6,7 @@ require("data.table")
 require("rpart")
 require("rpart.plot")
 
-setwd("X:\\gdrive\\austral2023v\\" )  #establezco la carpeta donde voy a trabajar
+setwd("C:\\Users\\aldan\\OneDrive\\Documentos\\ITBA\\DataMining\\" )  #establezco la carpeta donde voy a trabajar
 
 #cargo el dataset
 dataset  <- fread( "./datasets/dataset_pequeno.csv")
@@ -16,7 +16,7 @@ dir.create( "./exp/EA4810/", showWarnings = FALSE )
 setwd( "./exp/EA4810" )
 
 #uso esta semilla para los canaritos
-set.seed(102191)
+set.seed(211403)
 
 #agrego 30 variables canarito, random distribucion uniforme en el intervalo [0,1]
 for( i in  1:30 ) dataset[ , paste0("canarito", i ) :=  runif( nrow(dataset)) ]
@@ -27,10 +27,10 @@ modelo  <- rpart(formula= "clase_ternaria ~ .",
                  data= dataset[ foto_mes==202107 ,],
                  model= TRUE,
                  xval= 0,
-                 cp=        -0.82,
-                 minsplit= 769,
-                 minbucket=  8,
-                 maxdepth=   6 )
+                 cp=        -1,
+                 minsplit= 1000,
+                 minbucket=  200,
+                 maxdepth=   14 )
 
 
 #Grabo el arbol de canaritos

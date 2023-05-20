@@ -6,7 +6,7 @@ require("data.table")
 require("rpart")
 require("rpart.plot")
 
-setwd("X:\\gdrive\\austral2023v\\" )  #establezco la carpeta donde voy a trabajar
+setwd("C:\\Users\\aldan\\OneDrive\\Documentos\\ITBA\\DataMining\\" )  #establezco la carpeta donde voy a trabajar
 
 #cargo el dataset
 dataset  <- fread( "./datasets/dataset_pequeno.csv")
@@ -17,7 +17,7 @@ setwd( "./exp/EA4870" )
 
 
 #uso esta semilla para los canaritos
-set.seed(102191)
+set.seed(211403)
 
 # agrego tantos canaritos como variables tiene el dataset
 for( i in 1:ncol(dataset) )  dataset[ , paste0("canarito", i ) :=  runif( nrow(dataset)) ]
