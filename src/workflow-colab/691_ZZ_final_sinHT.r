@@ -84,8 +84,9 @@ tb_log  <- fread( arch_log )
 setorder( tb_log, -ganancia )
 
 #leo el nombre del expermento de la Training Strategy
-arch_TS  <- paste0( base_dir, "exp202104/", PARAM$exp_input, "/TrainingStrategy.txt" )
-TS  <- readLines( arch_TS, warn= FALSE )
+#arch_TS  <- paste0( base_dir, "exp202104/", PARAM$exp_input, "/TrainingStrategy.txt" )
+#TS  <- readLines( arch_TS, warn= FALSE )
+TS <- 'TS6410'
 
 #leo el dataset donde voy a entrenar el modelo final
 arch_dataset  <- paste0( base_dir, "exp202104/", TS, "/dataset_train_final.csv.gz" )
