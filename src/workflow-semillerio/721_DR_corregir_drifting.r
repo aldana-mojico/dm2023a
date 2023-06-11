@@ -51,16 +51,16 @@ AgregarVariables_IntraMes  <- function( dataset )
 {
   gc()
   #INICIO de la seccion donde se deben hacer cambios con variables nuevas
-
+  
   #creo un ctr_quarter que tenga en cuenta cuando los clientes hace 3 menos meses que estan
   dataset[  , ctrx_quarter_normalizado := ctrx_quarter ]
   dataset[ cliente_antiguedad==1 , ctrx_quarter_normalizado := ctrx_quarter * 5 ]
   dataset[ cliente_antiguedad==2 , ctrx_quarter_normalizado := ctrx_quarter * 2 ]
   dataset[ cliente_antiguedad==3 , ctrx_quarter_normalizado := ctrx_quarter * 1.2 ]
-
+  
   #variable extraida de una tesis de maestria de Irlanda
   dataset[  , mpayroll_sobre_edad  := mpayroll / cliente_edad ]
-
+  
   #se crean los nuevos campos para MasterCard  y Visa, teniendo en cuenta los NA's
   #varias formas de combinar Visa_status y Master_status
   dataset[ , vm_status01       := pmax( Master_status,  Visa_status, na.rm = TRUE) ]
@@ -68,19 +68,19 @@ AgregarVariables_IntraMes  <- function( dataset )
   dataset[ , vm_status03       := pmax( ifelse( is.na(Master_status), 10, Master_status) , ifelse( is.na(Visa_status), 10, Visa_status) ) ]
   dataset[ , vm_status04       := ifelse( is.na(Master_status), 10, Master_status)  +  ifelse( is.na(Visa_status), 10, Visa_status)  ]
   dataset[ , vm_status05       := ifelse( is.na(Master_status), 10, Master_status)  +  100*ifelse( is.na(Visa_status), 10, Visa_status)  ]
-
+  
   dataset[ , vm_status06       := ifelse( is.na(Visa_status), 
                                           ifelse( is.na(Master_status), 10, Master_status), 
                                           Visa_status)  ]
-
+  
   dataset[ , mv_status07       := ifelse( is.na(Master_status), 
                                           ifelse( is.na(Visa_status), 10, Visa_status), 
                                           Master_status)  ]
-
-
+  
+  
   #combino MasterCard y Visa
   dataset[ , vm_mfinanciacion_limite := rowSums( cbind( Master_mfinanciacion_limite,  Visa_mfinanciacion_limite) , na.rm=TRUE ) ]
-
+  
   dataset[ , vm_Fvencimiento         := pmin( Master_Fvencimiento, Visa_Fvencimiento, na.rm = TRUE) ]
   dataset[ , vm_Finiciomora          := pmin( Master_Finiciomora, Visa_Finiciomora, na.rm = TRUE) ]
   dataset[ , vm_msaldototal          := rowSums( cbind( Master_msaldototal,  Visa_msaldototal) , na.rm=TRUE ) ]
@@ -100,7 +100,7 @@ AgregarVariables_IntraMes  <- function( dataset )
   dataset[ , vm_cconsumos            := rowSums( cbind( Master_cconsumos,  Visa_cconsumos) , na.rm=TRUE ) ]
   dataset[ , vm_cadelantosefectivo   := rowSums( cbind( Master_cadelantosefectivo,  Visa_cadelantosefectivo) , na.rm=TRUE ) ]
   dataset[ , vm_mpagominimo          := rowSums( cbind( Master_mpagominimo,  Visa_mpagominimo) , na.rm=TRUE ) ]
-
+  
   #a partir de aqui juego con la suma de Mastercard y Visa
   dataset[ , vmr_Master_mlimitecompra:= Master_mlimitecompra / vm_mlimitecompra ]
   dataset[ , vmr_Visa_mlimitecompra  := Visa_mlimitecompra / vm_mlimitecompra ]
@@ -118,17 +118,16 @@ AgregarVariables_IntraMes  <- function( dataset )
   dataset[ , vmr_mpagosdolares       := vm_mpagosdolares / vm_mlimitecompra ]
   dataset[ , vmr_mconsumototal       := vm_mconsumototal  / vm_mlimitecompra ]
   dataset[ , vmr_mpagominimo         := vm_mpagominimo  / vm_mlimitecompra ]
-
+  
   #Aqui debe usted agregar sus propias nuevas variables
-
+  
   dataset[ , vfe_limiteconsumo :=   vm_mlimitecompra / mpayroll ]
   dataset[ , vfe_gasto_mas := vm_mconsumototal / mpayroll]
   dataset[ , m_gasto_mas_edad := vm_mconsumototal / mpayroll_sobre_edad]
-    #creo un tipo cliente que tenga en cuenta cuando gasta mas de lo gana
-  dataset[  , vfe_tipocliente := vfe_gasto_mas ]
-  dataset[ vfe_gasto_mas < 1 , vfe_tipocliente := 0 ] #gasto menos de lo que gana
-  dataset[ vfe_gasto_mas == 1 , vfe_tipocliente := 1 ] #gasto todo de lo que gana
-  dataset[ vfe_gasto_mas > 1 , vfe_tipocliente := 2 ] #gasto mas de lo que gana
+  #creo un tipo cliente que tenga en cuenta cuando gasta mas de lo gana
+  #dataset[ vfe_gasto_mas < 1 , vfe_tipocliente := 0 ] #gasto menos de lo que gana
+  #dataset[ vfe_gasto_mas == 1 , vfe_tipocliente := 1 ] #gasto todo de lo que gana
+  #dataset[ vfe_gasto_mas > 1 , vfe_tipocliente := 2 ] #gasto mas de lo que gana
   
   dataset[ , vfe_gasto_pago := vmr_mpagado / vmr_mconsumototal ] #ratio de ratio gasto mas de lo que gana
   dataset[ , vfe_saldo_pago := vmr_msaldototal / vmr_mconsumototal ] #ratio Saldo vs consumo
@@ -160,8 +159,8 @@ AgregarVariables_IntraMes  <- function( dataset )
   dataset[ , vfe_adelantodolares_payroll_edad :=  vm_madelantodolares / mpayroll_sobre_edad ] # adelantos en dolares vs payroll_sobre_edad
   
   #agregadas AM
-  				
-	dataset[ , m_rentabilidad_xproducto :=  mrentabilidad_annual/cproductos ] # adelantos en dolares vs payroll_sobre_edad
+  
+  dataset[ , m_rentabilidad_xproducto :=  mrentabilidad_annual/cproductos ] # adelantos en dolares vs payroll_sobre_edad
   dataset[ , m_caja_ahorro_xcaja :=  mcaja_ahorro/ccaja_ahorro ] # adelantos en dolares vs payroll_sobre_edad
   dataset[ , m_cuentas_saldo_xcuentas :=  mcuentas_saldo/tcuentas ] # adelantos en dolares vs payroll_sobre_edad
   dataset[ , m_autoservicio_xtc :=  mautoservicio/ctarjeta_debito_transacciones ] # adelantos en dolares vs payroll_sobre_edad
@@ -183,47 +182,47 @@ AgregarVariables_IntraMes  <- function( dataset )
   dataset[ , fe_Master_mpagos_msaldosusd :=  Master_mpagosdolares/Master_msaldodolares ] # adelantos en dolares vs payroll_sobre_edad
   dataset[ , fe_Master_pago_consumousd :=  Master_mpagosdolares/Master_mconsumosdolares ] # adelantos en dolares vs payroll_sobre_edad
   dataset[ , m_cmr :=  (Master_mpagominimo+Visa_mpagominimo+mprestamos_personales/5+mprestamos_prendarios/18+mprestamos_hipotecarios/30)	 ] # adelantos en dolares vs payroll_sobre_edad
-  dataset[ , cmr_payroll :=  cmr/payrolls	 ] # adelantos en dolares vs payroll_sobre_edad
-  dataset[ , m_cmr_edad :=  	cmr/cliente_edad ] # adelantos en dolares vs payroll_sobre_edad
+  dataset[ , cmr_payroll :=  m_cmr/m_payrolls	 ] # adelantos en dolares vs payroll_sobre_edad
+  dataset[ , m_cmr_edad :=  	m_cmr/cliente_edad ] # adelantos en dolares vs payroll_sobre_edad
   dataset[ , fe_Visa_mpagos_saldo :=  	Visa_mpagospesos/Visa_msaldopesos ] # adelantos en dolares vs payroll_sobre_edad
-  dataset[ , fe_Visa_mpagos_consumo :=  	Visa_mpagospesos/Visa_mconsumopesos ] # adelantos en dolares vs payroll_sobre_edad
+  dataset[ , fe_Visa_mpagos_consumo :=  	Visa_mpagospesos/Visa_mconsumospesos ] # adelantos en dolares vs payroll_sobre_edad
   dataset[ , fe_Visa_mpagos_saldo_usd :=  	Visa_mpagosdolares/Visa_msaldodolares ] # adelantos en dolares vs payroll_sobre_edad
-  dataset[ , fe_Visa_mpagos_consumo_usd :=  	Visa_mpagosdolares/Visa_mconsumodolares ] # adelantos en dolares vs payroll_sobre_edad
-  		
-dataset[ , fe_mtarjeta_visa_consumo_pr := mtarjeta_visa_consumo/payrolls ] 
-dataset[ , fe_mtarjeta_master_consumo_pr := mtarjeta_master_consumo/payrolls ] 
-dataset[ , fe_mprestamos_personales_pr := mprestamos_personales/payrolls ] 
-dataset[ , fe_mprestamos_prendarios_pr := mprestamos_prendarios/payrolls ] 
-dataset[ , fe_mprestamos_hipotecarios_pr := mprestamos_hipotecarios/payrolls ] 
-dataset[ , fe_mplazo_fijos_pr := (mplazo_fijo_pesos+mplazo_fijo_dolares)/payrolls ] 
-dataset[ , fe_minversiones_pr := (minversion2+minversion1_pesos)/payrolls ] 
-dataset[ , fe_cseguros_pr := (cseguro_vida+cseguro_auto+cseguro_vivienda+cseguro_accidentes_personales)/payrolls ] 
-dataset[ , fe_mcuenta_debitos_automaticos_pr := mcuenta_debitos_automaticos/payrolls ] 
-dataset[ , fe_mpagodeservicios_pr := mpagodeservicios/payrolls ] 
-dataset[ , fe_mcajeros_propios_descuentos_pr := mcajeros_propios_descuentos/payrolls ] 
-dataset[ , fe_mtarjeta_visa_descuentos_pr := mtarjeta_visa_descuentos/payrolls ] 
-dataset[ , fe_mtarjeta_master_descuentos_pr := mtarjeta_master_descuentos/payrolls ] 
-dataset[ , fe_mcomisiones_mantenimiento_pr := mcomisiones_mantenimiento/payrolls ] 
-dataset[ , fe_mforex_buy_pr := mforex_buy/payrolls ] 
-dataset[ , fe_mforex_sell_pr := mforex_sell/payrolls ] 
-dataset[ , fe_mextraccion_autoservicio_pr := mextraccion_autoservicio/payrolls ] 
-dataset[ , fe_mcheques_depositados_pr := mcheques_depositados/payrolls ] 
-dataset[ , fe_mcheques_emitidos_pr := mcheques_emitidos/payrolls ] 
-dataset[ , fe_mcheques_depositados_rechazados_pr := mcheques_depositados_rechazados/payrolls ] 
-dataset[ , fe_mcheques_emitidos_rechazados_pr := mcheques_emitidos_rechazados/payrolls ] 
-dataset[ , fe_matm_pr := matm/payrolls ] 
-dataset[ , fe_matm_other_pr := matm_other/payrolls ] 
-dataset[ , fe_Master_msaldototal_pr := Master_msaldototal/payrolls ] 
-dataset[ , fe_Master_mconsumospesos_pr := Master_mconsumospesos/payrolls ] 
-dataset[ , fe_Master_mpagado_pr := Master_mpagado/payrolls ] 
-dataset[ , fe_Master_mconsumototal_pr := Master_mconsumototal/payrolls ] 
-dataset[ , fe_Master_mpagominimo_pr := Master_mpagominimo/payrolls ] 
-dataset[ , fe_Visa_msaldototal_pr := Visa_msaldototal/payrolls ] 
-dataset[ , fe_Visa_mconsumospesos_pr := Visa_mconsumospesos/payrolls ] 
-dataset[ , fe_Visa_mpagado_pr := Visa_mpagado/payrolls ] 
-dataset[ , fe_Visa_mconsumototal_pr := Visa_mconsumototal/payrolls ] 
-dataset[ , fe_Visa_mpagominimo_pr := Visa_mpagominimo/payrolls ] 
-	
+  dataset[ , fe_Visa_mpagos_consumo_usd :=  	Visa_mpagosdolares/Visa_mconsumosdolares ] # adelantos en dolares vs payroll_sobre_edad
+  
+  dataset[ , fe_mtarjeta_visa_consumo_pr := mtarjeta_visa_consumo/m_payrolls ] 
+  dataset[ , fe_mtarjeta_master_consumo_pr := mtarjeta_master_consumo/m_payrolls ] 
+  dataset[ , fe_mprestamos_personales_pr := mprestamos_personales/m_payrolls ] 
+  dataset[ , fe_mprestamos_prendarios_pr := mprestamos_prendarios/m_payrolls ] 
+  dataset[ , fe_mprestamos_hipotecarios_pr := mprestamos_hipotecarios/m_payrolls ] 
+  dataset[ , fe_mplazo_fijos_pr := (mplazo_fijo_pesos+mplazo_fijo_dolares)/m_payrolls ] 
+  dataset[ , fe_minversiones_pr := (minversion2+minversion1_pesos)/m_payrolls ] 
+  dataset[ , fe_cseguros_pr := (cseguro_vida+cseguro_auto+cseguro_vivienda+cseguro_accidentes_personales)/m_payrolls ] 
+  dataset[ , fe_mcuenta_debitos_automaticos_pr := mcuenta_debitos_automaticos/m_payrolls ] 
+  dataset[ , fe_mpagodeservicios_pr := mpagodeservicios/m_payrolls ] 
+  dataset[ , fe_mcajeros_propios_descuentos_pr := mcajeros_propios_descuentos/m_payrolls ] 
+  dataset[ , fe_mtarjeta_visa_descuentos_pr := mtarjeta_visa_descuentos/m_payrolls ] 
+  dataset[ , fe_mtarjeta_master_descuentos_pr := mtarjeta_master_descuentos/m_payrolls ] 
+  dataset[ , fe_mcomisiones_mantenimiento_pr := mcomisiones_mantenimiento/m_payrolls ] 
+  dataset[ , fe_mforex_buy_pr := mforex_buy/m_payrolls ] 
+  dataset[ , fe_mforex_sell_pr := mforex_sell/m_payrolls ] 
+  dataset[ , fe_mextraccion_autoservicio_pr := mextraccion_autoservicio/m_payrolls ] 
+  dataset[ , fe_mcheques_depositados_pr := mcheques_depositados/m_payrolls ] 
+  dataset[ , fe_mcheques_emitidos_pr := mcheques_emitidos/m_payrolls ] 
+  dataset[ , fe_mcheques_depositados_rechazados_pr := mcheques_depositados_rechazados/m_payrolls ] 
+  dataset[ , fe_mcheques_emitidos_rechazados_pr := mcheques_emitidos_rechazados/m_payrolls ] 
+  dataset[ , fe_matm_pr := matm/m_payrolls ] 
+  dataset[ , fe_matm_other_pr := matm_other/m_payrolls ] 
+  dataset[ , fe_Master_msaldototal_pr := Master_msaldototal/m_payrolls ] 
+  dataset[ , fe_Master_mconsumospesos_pr := Master_mconsumospesos/m_payrolls ] 
+  dataset[ , fe_Master_mpagado_pr := Master_mpagado/m_payrolls ] 
+  dataset[ , fe_Master_mconsumototal_pr := Master_mconsumototal/m_payrolls ] 
+  dataset[ , fe_Master_mpagominimo_pr := Master_mpagominimo/m_payrolls ] 
+  dataset[ , fe_Visa_msaldototal_pr := Visa_msaldototal/m_payrolls ] 
+  dataset[ , fe_Visa_mconsumospesos_pr := Visa_mconsumospesos/m_payrolls ] 
+  dataset[ , fe_Visa_mpagado_pr := Visa_mpagado/m_payrolls ] 
+  dataset[ , fe_Visa_mconsumototal_pr := Visa_mconsumototal/m_payrolls ] 
+  dataset[ , fe_Visa_mpagominimo_pr := Visa_mpagominimo/m_payrolls ] 
+  
   
   #valvula de seguridad para evitar valores infinitos
   #paso los infinitos a NULOS
@@ -234,8 +233,8 @@ dataset[ , fe_Visa_mpagominimo_pr := Visa_mpagominimo/payrolls ]
     cat( "ATENCION, hay", infinitos_qty, "valores infinitos en tu dataset. Seran pasados a NA\n" )
     dataset[mapply(is.infinite, dataset)] <<- NA
   }
-
-
+  
+  
   #valvula de seguridad para evitar valores NaN  que es 0/0
   #paso los NaN a 0 , decision polemica si las hay
   #se invita a asignar un valor razonable segun la semantica del campo creado
@@ -247,7 +246,7 @@ dataset[ , fe_Visa_mpagominimo_pr := Visa_mpagominimo/payrolls ]
     cat( "Si no te gusta la decision, modifica a gusto el programa!\n\n")
     dataset[mapply(is.nan, dataset)] <<- 0
   }
-
+  
 }
 #------------------------------------------------------------------------------
 #deflaciona por IPC
@@ -261,7 +260,7 @@ drift_deflacion  <- function( campos_monetarios )
                   202007, 202008, 202009, 202010, 202011, 202012,
                   202101, 202102, 202103, 202104, 202105, 202106,
                   202107  )
-
+  
   vIPC  <- c( 1.9903030878, 1.9174403544, 1.8296186587,
               1.7728862972, 1.7212488323, 1.6776304408,
               1.6431248196, 1.5814483345, 1.4947526791,
@@ -273,15 +272,15 @@ drift_deflacion  <- function( campos_monetarios )
               0.9680542110, 0.9344152616, 0.8882274350,
               0.8532444140, 0.8251880213, 0.8003763543,
               0.7763107219  )
-
+  
   tb_IPC  <- data.table( "foto_mes"= vfoto_mes,
                          "IPC" = vIPC )
-
+  
   dataset[ tb_IPC,
            on= c("foto_mes"),
            (campos_monetarios) :=  .SD * i.IPC ,
            .SDcols = campos_monetarios ]
-
+  
 }
 
 #------------------------------------------------------------------------------
@@ -344,7 +343,7 @@ campos_monetarios  <- campos_monetarios[campos_monetarios %like% "^(m|Visa_m|Mas
 #aqui aplico un metodo para atacar el data drifting
 #hay que probar experimentalmente cual funciona mejor
 switch( 
-PARAM$metodo,
+  PARAM$metodo,
   "ninguno"        = cat( "No hay correccion del data drifting" ),
   "rank_simple"    = drift_rank_simple( campos_monetarios ),
   "rank_cero_fijo" = drift_rank_cero_fijo( campos_monetarios ),
